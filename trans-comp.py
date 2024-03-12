@@ -13,14 +13,14 @@ from dotenv import load_dotenv
 from selenium.webdriver.common.keys import Keys
 import glob
 
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeType
+# from selenium.webdriver.chrome.service import Service
+# from webdriver_manager.chrome import ChromeDriverManager
+# from selenium.webdriver.chrome.options import Options
+# from webdriver_manager.chrome import ChromeType
 
-# from selenium.webdriver.firefox.service import Service
-# from webdriver_manager.firefox import GeckoDriverManager
-# from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.options import Options
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -114,23 +114,23 @@ class Translator:
 	def initWebdriver(self):
 		if self._webdriver is not None:
 			self._webdriver.quit()
-		service = webdriver.ChromeService(executable_path="C:/Users/Dog/AppData/Local/Google/Chrome/Application/driver/chromedriver.exe")
-		chrome_options = Options()
-		chrome_options.add_argument("--headless")
-		chrome_options.binary_location = "C:/Users/Dog/AppData/Local/Google/Chrome/Application/chrome.exe"
-		chrome_options.add_argument("--window-size=1920,1080")
-		self._webdriver = webdriver.Chrome(options=chrome_options, service=service)
+		# service = webdriver.ChromeService(executable_path="")
+		# chrome_options = Options()
+		# chrome_options.add_argument("--headless")
+		# chrome_options.binary_location = ""
+		# chrome_options.add_argument("--window-size=1920,1080")
+		# self._webdriver = webdriver.Chrome(options=chrome_options, service=service)
 
-		# firefox_options = Options()
-		# firefox_options.add_argument("--headless")
-		# firefox_options.add_argument("--window-size=1920,1080")
-		# if 'SOCKS_PROXY' in os.environ:
-		# 	proxy_host, proxy_port = os.environ['SOCKS_PROXY'].split(':')
-		# 	firefox_options.set_preference('network.proxy.type', 1)
-		# 	firefox_options.set_preference('network.proxy.socks', proxy_host)
-		# 	firefox_options.set_preference('network.proxy.socks_port', proxy_port)
-		# #self._webdriver = webdriver.Firefox(options=firefox_options, service=Service(GeckoDriverManager().install()))
-		# self._webdriver = webdriver.Firefox(options=firefox_options)
+		firefox_options = Options()
+		firefox_options.add_argument("--headless")
+		firefox_options.add_argument("--window-size=1920,1080")
+		if 'SOCKS_PROXY' in os.environ:
+			proxy_host, proxy_port = os.environ['SOCKS_PROXY'].split(':')
+			firefox_options.set_preference('network.proxy.type', 1)
+			firefox_options.set_preference('network.proxy.socks', proxy_host)
+			firefox_options.set_preference('network.proxy.socks_port', proxy_port)
+		#self._webdriver = webdriver.Firefox(options=firefox_options, service=Service(GeckoDriverManager().install()))
+		self._webdriver = webdriver.Firefox(options=firefox_options)
 		self._webdriver.set_window_size(1920, 1080)
 
 		self._webdriver.get("https://www.deepl.com/en/translator")
@@ -291,6 +291,7 @@ class Translator:
 					break
 			translated_text = re.sub(r"（(%\d+%)）", r"(\1)", translated_text)
 			translated_text = self.tags2links(translated_text, links)
+			translated_text = re.sub(r"（.*?）",r"(\1)",translated_text)
 
 			print("原文："+text)
 			print("gpt翻译："+translated_text)
@@ -299,8 +300,9 @@ class Translator:
 			print()
    
 			return translated_text
-		elif self._webdriver is None:
-			self.initWebdriver()
+		elif self._useDeepl:
+			if self._webdriver is None:
+				self.initWebdriver()
 			
    			#Deepl翻译
 			# Replace links with specific markers we can put in place after translating later
@@ -347,7 +349,7 @@ class Translator:
 
 			# Replace back any placeholders for links
 			translated_text = self.tags2links(translated_text, links)
-
+			translated_text = re.sub(r"（.*?）",r"(\1)",translated_text)
 			# Click the input to make sure the translation is really complete and we were not blocked
 			# This will raise an exception otherwise
 			self._inputField.click()
