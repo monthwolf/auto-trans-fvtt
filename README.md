@@ -49,7 +49,8 @@ auto-trans-fvtt          项目根目录
   例如对于加载缓存的限时gpt翻译，可以使用命令`python trans-comp.py --gpt --translate --maxrun 18000 data/*.json`
 > 推荐配合fvtt模组[`foundryvtt-babele-translation-files-generator`](https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator)一起使用，可以使用我的[fork](https://github.com/monthwolf/foundryvtt-babele-translation-files-generator)版本，加入了文件夹名称映射，也将原项目未merge的修复push合并了
 > 该mod依赖于babele，主要功能为快速生成babele翻译文件映射，演示如下：  
-> ![EasyGIF-1710256718821](https://github.com/monthwolf/auto-trans-fvtt/assets/52775320/383a86ea-e7b2-4bcc-97c8-5ee43b1d734d)
+> ![bandicam 2024-03-12 23-14-46-713](https://github.com/monthwolf/auto-trans-fvtt/assets/52775320/671cf6cb-95da-422a-a79d-d4ea40517428)
+
 
 ### 展示
 以下冒险采用gpt翻译，耗时大概几分钟，效率很高
