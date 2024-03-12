@@ -19,6 +19,7 @@
 auto-trans-fvtt          项目根目录
 ├── data                 翻译源文件存储目录
 ├── data.zh              翻译后的文件存储目录
+├── .env                 环境变量配置文件
 ├── requirements.txt     python依赖文件
 ├── trans-comp.py        翻译程序文件
 ├── trans-comp-edge.py   适用于电脑的翻译程序文件
