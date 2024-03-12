@@ -69,4 +69,4 @@ todo
 
 
 ## 问题反馈
-任何程序问题，欢迎在[issues](https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator)中提供反馈！
+任何程序问题和改进建议，欢迎在[issues](https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator)中提供反馈！
