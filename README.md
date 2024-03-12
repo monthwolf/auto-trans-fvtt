@@ -34,12 +34,13 @@ auto-trans-fvtt          项目根目录
     - 在命令行运行命令`pip install -r requirements.txt`（运行该步骤请确保你已配置过python环境）
 - 基本使用:
     - 运行命令 `python trans-comp.py --deepl --translate data/*.json`，程序将使用deepl开始翻译
-- 进阶使用:   
+- 进阶使用:
+    **使用Chatgpt翻译**:使用chatgpt进行翻译，需要先在`.env`文件中修改环境变量，配置好gpt请求接口后再运行程序
     **翻译程序参数：**
     | 参数             | 类型     | 默认值     | 描述                                           |  
   |-----------------|---------|----------|-----------------------------------------------|
   | `--language`    | str     | 'zh'     | 设置翻译目标语言                               |
-  | `--translate`   | bool    | False     | 是否启用翻译缓存读取                                 |
+  | `--translate`   | bool    | False     | 是否直接翻译文件                                |
   | `--deepl`       | bool    | False    | 是否使用 DeepL 进行翻译 （和gpt二选一）       |
   | `--gpt`         | bool    | False    | 是否使用 GPT 进行翻译 （和deepl二选一）        |
   | `--maxrun`      | int     | False   | 最大运行时间，单位为秒                    |
@@ -52,7 +53,10 @@ auto-trans-fvtt          项目根目录
 > ![bandicam 2024-03-12 23-14-46-713](https://github.com/monthwolf/auto-trans-fvtt/assets/52775320/671cf6cb-95da-422a-a79d-d4ea40517428)
 
 
-### 展示
+### Github工作流使用
+todo
+
+### 翻译展示
 以下冒险采用gpt翻译，耗时大概几分钟，效率很高
 <img width="1280" alt="image" src="https://github.com/monthwolf/auto-trans-fvtt/assets/52775320/a709e3d2-7622-4c08-84d4-7199c81932e6">
 <img width="1280" alt="image" src="https://github.com/monthwolf/auto-trans-fvtt/assets/52775320/131c6dbf-74f5-4d8f-980a-3001d4f67185">
@@ -62,8 +66,6 @@ auto-trans-fvtt          项目根目录
 
 
 
-### Github工作流使用
-todo
 
 ## 问题反馈
 任何程序问题，欢迎在[issues](https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator)中提供反馈！
