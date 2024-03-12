@@ -3,6 +3,7 @@
 
 # FVTT合集包自动化翻译 - Auto-Trans-FVTT
 > 适用于`babele`生成的合集翻译映射的自动化翻译程序，目前支持deepl和chatgpt两种翻译模式
+> 项目灵感来源于[5etools-translated.github.io](https://github.com/5etools-translated/5etools-translated.github.io)
   
 
 
