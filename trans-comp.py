@@ -266,7 +266,8 @@ class Translator:
 					{
 					"role": "system",
 					"content": '''translate English to Simplified Chinese.
-- in line with local language habits,and text like (%num%) should be still output as (%num%) in tranlation.
+- in line with local language habits,vars wrapped with {} need to be retained and do not need to be translated, and text like (%num%) should be still output as (%num%) in tranlation.
+- if some words have many translations, use the translation which is suitable for D&D and running group games.
 - translation comply with dnd running group rules and proper nouns should keep the English in `()` after the translation.
 					'''
 					},
@@ -275,9 +276,8 @@ class Translator:
 					"content":translate_text,
 					}
 				],
-				temperature=0.25,
-				top_p=0.67,
-				max_tokens=3000
+				temperature=0.75,
+				top_p=0.35
 				)  
 			print("原文："+text)
 			for chunk in res:
@@ -369,7 +369,7 @@ def translate_data(translator: Translator, data):
 	elif type(data) is dict:
 		for k, v in data.items():
 			# We only translate specific keys from dicts
-			if (k in  ['label', 'name','description'] and type(v) is str) or (k==v and type(v)):
+			if (k in  ['label', 'name','description','text'] and type(v) is str) or (k==v and type(v)):
 				data[k] = translator.translate(v)
 			elif type(v) is list:
 				for idx, entry in enumerate(v):
