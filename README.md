@@ -6,8 +6,8 @@
 > 项目灵感来源于[5etools-translated.github.io](https://github.com/5etools-translated/5etools-translated.github.io)
   
 ## 待办
-- [] 添加谷歌AI翻译
-- [] 不依赖babele的通用合集包json汉化
+- [ ] 添加谷歌AI翻译
+- [ ] 不依赖babele的通用合集包json汉化
 
 ## 介绍
 这是一个辅助fvtt合集翻译的程序，本程序旨在自动化翻译合集文本内容，为翻译人士提供便利，有效减少翻译时间成本。  
