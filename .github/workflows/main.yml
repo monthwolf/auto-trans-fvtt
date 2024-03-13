@@ -1,13 +1,13 @@
 name: translate 
   
- env: 
+env: 
    TRANS_TYPE: 'deepl' 
    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
    APIKEY: ${{ secrets.APIKEY }} 
    BASEURL: 'https://api.openai.com/v1' 
    MODEL: 'gpt-3.5-turbo-0125' 
   
- on: 
+on: 
    workflow_dispatch: 
      inputs: 
        apikey: 
@@ -27,16 +27,16 @@ name: translate
            required: True 
            default: ${TRANS_TYPE} 
   
- concurrency: 
+concurrency: 
    group: "translation" 
   
  # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages 
- permissions: 
+permissions: 
    contents: write 
    pages: write 
    id-token: write 
   
- jobs: 
+jobs: 
    translate: 
      strategy: 
        max-parallel: 1 
