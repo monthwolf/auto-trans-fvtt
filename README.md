@@ -35,7 +35,7 @@ auto-trans-fvtt          项目根目录
     - 在命令行运行命令`pip install -r requirements.txt`（运行该步骤请确保你已配置过python环境）
 - 基本使用:
     - 运行命令 `python trans-comp.py --deepl --translate data/*.json`，程序将使用deepl开始翻译
-- 进阶使用:
+- 进阶使用:  
     **使用Chatgpt翻译**:使用chatgpt进行翻译，需要先在`.env`文件中修改环境变量，配置好gpt请求接口后再运行程序
     **翻译程序参数：**
     | 参数             | 类型     | 默认值     | 描述                                           |  
