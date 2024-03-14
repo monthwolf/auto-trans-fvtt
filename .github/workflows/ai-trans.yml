@@ -23,7 +23,7 @@ on:
           required: False
           default: ${MODEL}
       method:
-          description: 'Translation method(deepl or gpt)'
+          description: 'Translation method(google or gpt)'
           required: True
           default: ${TRANS_TYPE}
 
@@ -41,7 +41,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        files: ['data/spells/*.json','data/class/*.json','data/*.json','data/book/*.json','data/adventure/*.json','data/bestiary/*.json']
+        files: ['data/*.json','data/*/*.json']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -59,7 +59,7 @@ jobs:
       continue-on-error: true
       run: |
            cd $GITHUB_WORKSPACE
-           python trans-comp.py --maxrun 18000 --translate --${{ inputs.method }} ${{ matrix.files }} 
+           python trans-comp.py --maxrun 18000 --translate --ai ${{ inputs.method }} ${{ matrix.files }} 
            python trans-comp.py --translate ${{ matrix.files }}
       env:
           BASEURL: ${{ inputs.baseurl}}
