@@ -176,17 +176,18 @@ class Translator:
 		for text in self.split_sentences(text,self._maxLength):
 			if self._useAI=='gpt':
 				self._aiClient = OpenAI(api_key=apiKey, base_url=baseUrl)
-				res = self._gptClient.chat.completions.create(
+				res = self._aiClient.chat.completions.create(
 					model=self._Model, 
 					stream=True,
 					#notice:the system prompt will cost tokens per request,you can shorten it if you want.
 					messages=[
 						{
 						"role": "system",
-						"content": '''translate English to Simplified Chinese.
-	- in line with local language habits,vars wrapped with {} need to be retained and do not need to be translated, and text like (%num%) should be still output as (%num%) in tranlation.
-	- if some words have many translations, use the translation which is suitable for D&D and TRPG.
-	- translation comply with dnd TRPG rules and proper nouns should keep the English in `()` after the translation.
+						"content": '''translate English words to Simplified Chinese.
+- For stand-alone phrase words, do not add periods.
+- in line with local language habits,vars wrapped with {} or () or [[]] need to be retained and do not need to be translated.
+- if some words have many translations, use the translation which is suitable for D&D,COC or TRPG.
+- translation comply with dnd TRPG rules and proper nouns should keep the original text in `()` after the translation.
 						'''
 						},
 						{
@@ -204,7 +205,7 @@ class Translator:
 					if(cont!=None):
 						translated_text += cont
 					else:
-						print("\n")
+						# print("\n")
 						break
 			elif self._useAI=='google':
 				genai.configure(api_key=googleKey)
@@ -217,19 +218,19 @@ class Translator:
 				safety_settings = [
 				{
 					"category": "HARM_CATEGORY_HARASSMENT",
-					"threshold": "BLOCK_MEDIUM_AND_ABOVE"
+					"threshold": "BLOCK_NONE"
 				},
 				{
 					"category": "HARM_CATEGORY_HATE_SPEECH",
-					"threshold": "BLOCK_MEDIUM_AND_ABOVE"
+					"threshold": "BLOCK_NONE"
 				},
 				{
 					"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-					"threshold": "BLOCK_MEDIUM_AND_ABOVE"
+					"threshold": "BLOCK_NONE"
 				},
 				{
 					"category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-					"threshold": "BLOCK_MEDIUM_AND_ABOVE"
+					"threshold": "BLOCK_NONE"
 				},
 				]
 
@@ -349,7 +350,7 @@ class Translator:
 			translated_text = self.initAI(translate_text)
 			translated_text = re.sub(r"（(%\d+%)）", r"(\1)", translated_text)
 			translated_text = self.tags2links(translated_text, links)
-			translated_text = re.sub(r"(（.*?）)",r"(\1)",translated_text)
+			translated_text = re.sub(r"（(.*?)）",r"(\1)",translated_text)
 			print("原文："+text)
 			print("AI翻译："+translated_text)
 			time.sleep(0.5)
@@ -408,7 +409,7 @@ class Translator:
 			# Click the input to make sure the translation is really complete and we were not blocked
 			# This will raise an exception otherwise
 			self._inputField.click()
-			translated_text = re.sub(r"(（.*?）)",r"(\1)",translated_text)
+			translated_text = re.sub(r"（(.*?)）",r"(\1)",translated_text)
 			print("原文："+text)
 			print("deepl翻译："+translated_text)
 			self.cacheSet(text, translated_text)
@@ -425,7 +426,7 @@ def translate_data(translator: Translator, data):
 		for k, v in data.items():
 			# We only translate specific keys from dicts
 			# print(k+"  test   "+str(v))
-			if (k in  ['label', 'name','description','text'] and type(v) is str) or (k==v and type(v)):
+			if (k  not in  ['id'] and type(v) is str) or (k==v and type(v)):
 				data[k] = translator.translate(v)
 			elif type(v) is list:
 				for idx, entry in enumerate(v):
@@ -479,15 +480,13 @@ if __name__ == '__main__':
 	parser.add_argument('--maxrun', type=int, default=False)
 	parser.add_argument('--maxlen', type=int, default=3000)
 	parser.add_argument('--recheck-words', type=str, default=[], nargs='*')
-	parser.add_argument('files', type=str)
+	parser.add_argument('files', type=str,nargs='*')
 	args = parser.parse_args()
 	maxRuntime = args.maxrun
-	
 	if args.language.lower() not in supported_languages:
 		raise Exception(f"Unsupported language {args.language} - Valid are: {supported_languages.keys()}")
-	files=glob.glob(args.files)
 	# print(files)
-	for file in files:
+	for file in args.files:
 		if file.startswith("data/generated"):
 			continue
 		translate_file(args.language.lower(), file, args.translate, args.deepl, args.recheck_words, args.ai,args.maxlen)
