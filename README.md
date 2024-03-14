@@ -2,7 +2,7 @@
 ![25c7a33d11864f5c897bf2f943200d61 png~tplv-0es2k971ck-image](https://github.com/monthwolf/auto-trans-fvtt/assets/52775320/eaa88f09-35da-4ee9-a97b-0ce505049a48)
 
 # FVTT合集包自动化翻译 - Auto-Trans-FVTT
-> 适用于`babele`生成的合集翻译映射的自动化翻译程序，目前支持deepl和chatgpt两种翻译模式
+> 适用于`babele`生成的合集翻译映射的自动化翻译程序，目前支持deepl、chatgpt和google-gemini三种翻译模式
 > 项目灵感来源于[5etools-translated.github.io](https://github.com/5etools-translated/5etools-translated.github.io)
 
 ## 更新
