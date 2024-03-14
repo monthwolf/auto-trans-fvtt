@@ -7,11 +7,11 @@ import time
 from signal import signal, SIGINT
 import argparse
 import traceback
-from openai import OpenAI
-from selenium import webdriver
 from dotenv import load_dotenv
-from selenium.webdriver.common.keys import Keys
 import glob
+
+import google.generativeai as genai
+from openai import OpenAI
 
 from selenium.webdriver.edge.options import Options
 from selenium.webdriver.edge.service import Service as EdgeService
@@ -21,7 +21,8 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 # from selenium.webdriver.firefox.service import Service
 # from webdriver_manager.firefox import GeckoDriverManager
 # from selenium.webdriver.firefox.options import Options
-
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -46,6 +47,7 @@ supported_languages = {
 if os.path.exists('.env'):
     load_dotenv()
 apiKey=os.environ.get('APIKEY')
+googleKey=os.environ.get('GOOGLEKEY')
 baseUrl=os.environ.get('BASEURL')
 todoCharCounter = 0
 maxRuntime = 0
@@ -53,13 +55,13 @@ startTime = time.time()
 
 
 class Translator:
-	def __init__(self, language: str, cacheFile: str, useDeepl: bool, glossary_file: str, recheckWords: list, useAI: bool):
+	def __init__(self, language: str, cacheFile: str, useDeepl: bool, glossary_file: str, recheckWords: list, useAI: str,maxLength: int):
 		self._language = language
 
 		#self._tag_regex = '{(?!(@i )|(@italic )|(@b )|(@bold )|(@u )|(@underline )|(@s )|(@strike )|(@color )|(@note )|(@footnote )).*?}'
 		#self._tag_regex = '{(?!(@note )|(@footnote )).*?}'
 		self._tag_regex = '{.*?{.*?}.*?}|{.*?}'
-
+		self._maxLength = maxLength
 		self._cacheFile = cacheFile
 		self._cacheDirty = False
 		self._cacheData = {}
@@ -158,10 +160,100 @@ class Translator:
 
 		# Init glossary
 		self._deeplGlossary = []
+	def split_sentences(self, text:str,length:int):
+		textList = text.split(".")
+		outList = []
+		sent = ""
+		for i in textList:
+			if len(sent+i) <= length:
+				sent += i+"."
+			else:
+				outList.append(sent)
+				sent = i+"."
+		outList.append(sent)
+		# print(outList)
+		return outList
+	def initAI(self,text:str):
+		translated_text=""
+		for text in self.split_sentences(text,self._maxLength):
+			if self._useAI=='gpt':
+				self._aiClient = OpenAI(api_key=apiKey, base_url=baseUrl)
+				res = self._gptClient.chat.completions.create(
+					model=self._Model, 
+					stream=True,
+					#notice:the system prompt will cost tokens per request,you can shorten it if you want.
+					messages=[
+						{
+						"role": "system",
+						"content": '''translate English to Simplified Chinese.
+	- in line with local language habits,vars wrapped with {} need to be retained and do not need to be translated, and text like (%num%) should be still output as (%num%) in tranlation.
+	- if some words have many translations, use the translation which is suitable for D&D and TRPG.
+	- translation comply with dnd TRPG rules and proper nouns should keep the English in `()` after the translation.
+						'''
+						},
+						{
+						"role": "user",
+						"content":text,
+						}
+					],
+					temperature=0.78,
+					top_p=0.34
+					) 
+				for chunk in res:
+					# print(chunk)
+					delta=chunk.choices[0].delta
+					cont=delta.content
+					if(cont!=None):
+						# print(cont)
+						translated_text += cont
+					else:
+						print("\n")
+						break
+			elif self._useAI=='google':
+				genai.configure(api_key=googleKey)
+				generation_config = {
+				"temperature": 0.68,
+				"top_p": 1,
+				"top_k": 1
+				}
 
-	def initAI(self):
-		self._gptClient = OpenAI(api_key=apiKey, base_url=baseUrl)
- 
+				safety_settings = [
+				{
+					"category": "HARM_CATEGORY_HARASSMENT",
+					"threshold": "BLOCK_NONE"
+				},
+				{
+					"category": "HARM_CATEGORY_HATE_SPEECH",
+					"threshold": "BLOCK_NONE"
+				},
+				{
+					"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+					"threshold": "BLOCK_NONE"
+				},
+				{
+					"category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+					"threshold": "BLOCK_NONE"
+				},
+				]
+
+				self._aiClient = genai.GenerativeModel(model_name="gemini-1.0-pro",
+											generation_config=generation_config,
+											safety_settings=safety_settings)
+				conv = self._aiClient.start_chat(history=[
+				{
+					"role": "user",
+					"parts": ["translate all English text to Simplified Chinese(sentences should also be translated).\\n- in line with local language habits,vars wrapped with  () or [] need to be retained and do not need to be translated.\\n- if some words have many translations, use the translation which is suitable for D&D and TRPG games.\\n- translation comply with dnd TRPG rules and proper nouns should keep the English in `()` after the translation.\\nall above is the rule and don't need to be translated,now my first sentence to translate is:(%0%) and {@creature Malivar|AitFR-ISF} ignored the stele and the medallion in their rush to reach the library."]
+				},
+				{
+					"role": "model",
+					"parts": ["(%0%) 和 {@creature Malivar|AitFR-ISF} 冲向图书馆，无视了石碑和奖章。"]
+				},
+				])
+				res=conv.send_message(text,stream=True)
+				for chunk in res:
+					print(chunk.text)
+					translated_text += chunk.text
+		return translated_text
 	def _setupGlossary(self, text: str):
 		contains = {
 			word: translation
@@ -257,48 +349,16 @@ class Translator:
 		if not (self._useDeepl or self._useAI):
 			return text
 		elif self._useAI:
-			self.initAI() #todo
-			translate_text, links = self.links2tags(text)
-			translated_text = ""
-			res = self._gptClient.chat.completions.create(
-				model=self._Model, 
-				stream=True,
-				#notice:the system prompt will cost tokens per request,you can shorten it if you want.
-				messages=[
-					{
-					"role": "system",
-					"content": '''translate English to Simplified Chinese.
-- in line with local language habits,vars wrapped with {} need to be retained and do not need to be translated, and text like (%num%) should be still output as (%num%) in tranlation.
-- if some words have many translations, use the translation which is suitable for D&D and running group games.
-- translation comply with dnd running group rules and proper nouns should keep the English in `()` after the translation.
-					'''
-					},
-					{
-					"role": "user",
-					"content":translate_text,
-					}
-				],
-				temperature=0.78,
-				top_p=0.34
-				)  
-			for chunk in res:
-				# print(chunk)
-				delta=chunk.choices[0].delta
-				cont=delta.content
-				if(cont!=None):
-					translated_text += cont
-				else:
-					print("\n")
-					break
+			# translate_text, links = self.links2tags(text)
+			translated_text = self.initAI(text)
 			translated_text = re.sub(r"（(%\d+%)）", r"(\1)", translated_text)
-			translated_text = self.tags2links(translated_text, links)
-			translated_text = re.sub(r"（.*?）",r"(\1)",translated_text)
+			# translated_text = self.tags2links(translated_text, links)
+			translated_text = re.sub(r"(（.*?）)",r"(\1)",translated_text)
 			print("原文："+text)
-			print("gpt翻译："+translated_text)
+			print("AI翻译："+translated_text)
 			time.sleep(0.5)
 			self.cacheSet(text, translated_text)
 			print()
-   
 			return translated_text
 		elif self._useDeepl:
 			if self._webdriver is None:
@@ -352,7 +412,7 @@ class Translator:
 			# Click the input to make sure the translation is really complete and we were not blocked
 			# This will raise an exception otherwise
 			self._inputField.click()
-			translated_text = re.sub(r"（.*?）",r"(\1)",translated_text)
+			translated_text = re.sub(r"(（.*?）)",r"(\1)",translated_text)
 			print("原文："+text)
 			print("deepl翻译："+translated_text)
 			self.cacheSet(text, translated_text)
@@ -380,7 +440,7 @@ def translate_data(translator: Translator, data):
 			elif type(v) is dict:
 				translate_data(translator, v)
 
-def translate_file(language: str, fileName: str, writeJSON: bool, useDeepl: bool, recheckWords: list,useAI: bool):
+def translate_file(language: str, fileName: str, writeJSON: bool, useDeepl: bool, recheckWords: list,useAI: str,maxLength: int):
 	# cache_file = fileName.replace("data/", f"translation/cache/{language}/")
 	cache_file = re.sub(r"data(/|\\)", f"translation/cache/{language}/", fileName)
 	print (cache_file)
@@ -393,7 +453,7 @@ def translate_file(language: str, fileName: str, writeJSON: bool, useDeepl: bool
 	os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
 	data = {}
-	with Translator(language, cache_file, useDeepl, glossary_file, recheckWords, useAI) as translator:
+	with Translator(language, cache_file, useDeepl, glossary_file, recheckWords, useAI,maxLength) as translator:
 		print(f"Translating\t{file}")
 		try:
 			with open(fileName,encoding='utf-8') as f:
@@ -419,8 +479,9 @@ if __name__ == '__main__':
 	parser.add_argument('--language', type=str,  default='zh')
 	parser.add_argument('--translate', type=bool, default=False, action=argparse.BooleanOptionalAction)
 	parser.add_argument('--deepl', type=bool, default=False, action=argparse.BooleanOptionalAction)
-	parser.add_argument('--gpt', type=bool, default=False, action=argparse.BooleanOptionalAction)
+	parser.add_argument('--ai', type=str, default=False)
 	parser.add_argument('--maxrun', type=int, default=False)
+	parser.add_argument('--maxlen', type=int, default=3000)
 	parser.add_argument('--recheck-words', type=str, default=[], nargs='*')
 	parser.add_argument('files', type=str)
 	args = parser.parse_args()
@@ -429,10 +490,10 @@ if __name__ == '__main__':
 	if args.language.lower() not in supported_languages:
 		raise Exception(f"Unsupported language {args.language} - Valid are: {supported_languages.keys()}")
 	files=glob.glob(args.files)
-	print(files)
+	# print(files)
 	for file in files:
 		if file.startswith("data/generated"):
 			continue
-		translate_file(args.language.lower(), file, args.translate, args.deepl, args.recheck_words, args.gpt)
+		translate_file(args.language.lower(), file, args.translate, args.deepl, args.recheck_words, args.ai,args.maxlen)
 
 	print(f"Total todo: {todoCharCounter}")
