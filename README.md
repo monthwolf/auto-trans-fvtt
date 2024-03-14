@@ -49,13 +49,14 @@ auto-trans-fvtt          项目根目录
   |-----------------|---------|----------|-----------------------------------------------|
   | `--language`    | str     | 'zh'     | 设置翻译目标语言                               |
   | `--translate`   | bool    | False     | 是否直接翻译文件                                |
-  | `--deepl`       | bool    | False    | 是否使用 DeepL 进行翻译 （和gpt二选一）       |
-  | `--gpt`         | bool    | False    | 是否使用 GPT 进行翻译 （和deepl二选一）        |
+  | `--deepl`       | bool    | False    | 是否使用 DeepL 进行翻译 （和ai翻译二选一）       |
+  | `--ai`         | str    | False    |  使用`gpt`或者`google`进行AI翻译       |
   | `--maxrun`      | int     | False   | 最大运行时间，单位为秒                    |
+   | `--maxlen`      | int     | 3000   | 每段切分文字的最大长度                    |
   | `--recheck-words` | str    | []      | 指定需要重新检查的翻译列表                           |
   | `files`         | str     |          | 指定程序翻译的文件路径，可以使用通配符*                               |
   
-  例如对于加载缓存的限时gpt翻译，可以使用命令`python trans-comp.py --gpt --translate --maxrun 18000 data/*.json`
+  例如对于加载缓存的限时gpt翻译，可以使用命令`python trans-comp.py --ai gpt --translate --maxrun 18000 data/*.json`
 > 推荐配合fvtt模组[`foundryvtt-babele-translation-files-generator`](https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator)一起使用，可以使用我的[fork](https://github.com/monthwolf/foundryvtt-babele-translation-files-generator)版本，加入了文件夹名称映射，也将原项目未merge的修复push合并了
 > 该mod依赖于babele，主要功能为快速生成babele翻译文件映射，演示如下：  
 > ![bandicam 2024-03-12 23-14-46-713](https://github.com/monthwolf/auto-trans-fvtt/assets/52775320/671cf6cb-95da-422a-a79d-d4ea40517428)
