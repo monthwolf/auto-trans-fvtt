@@ -6,7 +6,7 @@
 > 项目灵感来源于[5etools-translated.github.io](https://github.com/5etools-translated/5etools-translated.github.io)
   
 ## 待办
-- [ ] 添加谷歌AI翻译
+- [x] 添加谷歌AI翻译
 - [ ] 不依赖babele的通用合集包json汉化
 
 ## 介绍
