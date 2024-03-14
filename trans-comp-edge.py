@@ -178,7 +178,7 @@ class Translator:
 		for text in self.split_sentences(text,self._maxLength):
 			if self._useAI=='gpt':
 				self._aiClient = OpenAI(api_key=apiKey, base_url=baseUrl)
-				res = self._gptClient.chat.completions.create(
+				res = self._aiClient.chat.completions.create(
 					model=self._Model, 
 					stream=True,
 					#notice:the system prompt will cost tokens per request,you can shorten it if you want.
@@ -186,7 +186,7 @@ class Translator:
 						{
 						"role": "system",
 						"content": '''translate English to Simplified Chinese.
-	- in line with local language habits,vars wrapped with {} need to be retained and do not need to be translated, and text like (%num%) should be still output as (%num%) in tranlation.
+	- in line with local language habits,vars wrapped with {} or () or [[]] need to be retained and do not need to be translated.
 	- if some words have many translations, use the translation which is suitable for D&D and TRPG.
 	- translation comply with dnd TRPG rules and proper nouns should keep the English in `()` after the translation.
 						'''
@@ -210,7 +210,7 @@ class Translator:
 						print("\n")
 						break
 			elif self._useAI=='google':
-				genai.configure(api_key=googleKey)
+				genai.configure(api_key=googleKey,transport='rest')
 				generation_config = {
 				"temperature": 0.68,
 				"top_p": 1,
@@ -251,8 +251,9 @@ class Translator:
 				])
 				res=conv.send_message(text,stream=True)
 				for chunk in res:
-					print(chunk.text)
+					print(chunk.text,end="")
 					translated_text += chunk.text
+			time.sleep(1)
 		return translated_text
 	def _setupGlossary(self, text: str):
 		contains = {
@@ -353,7 +354,7 @@ class Translator:
 			translated_text = self.initAI(text)
 			translated_text = re.sub(r"（(%\d+%)）", r"(\1)", translated_text)
 			# translated_text = self.tags2links(translated_text, links)
-			translated_text = re.sub(r"(（.*?）)",r"(\1)",translated_text)
+			translated_text = re.sub(r"（(.*?)）",r"(\1)",translated_text)
 			print("原文："+text)
 			print("AI翻译："+translated_text)
 			time.sleep(0.5)
@@ -412,7 +413,7 @@ class Translator:
 			# Click the input to make sure the translation is really complete and we were not blocked
 			# This will raise an exception otherwise
 			self._inputField.click()
-			translated_text = re.sub(r"(（.*?）)",r"(\1)",translated_text)
+			translated_text = re.sub(r"（(.*?)）",r"(\1)",translated_text)
 			print("原文："+text)
 			print("deepl翻译："+translated_text)
 			self.cacheSet(text, translated_text)
@@ -429,7 +430,7 @@ def translate_data(translator: Translator, data):
 		for k, v in data.items():
 			# We only translate specific keys from dicts
 			# print(k+"  test   "+str(v))
-			if (k in  ['label', 'name','description','text'] and type(v) is str) or (k==v and type(v)):
+			if (k not in  ['id'] and type(v) is str) or (k==v and type(v)):
 				data[k] = translator.translate(v)
 			elif type(v) is list:
 				for idx, entry in enumerate(v):
