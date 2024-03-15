@@ -60,7 +60,7 @@ jobs:
       run: |
            cd $GITHUB_WORKSPACE
            ls
-           python trans-comp.py --maxrun 18000 --translate --ai ${{ inputs.method }} ${{ matrix.files }} 
+           python trans-comp.py --translate --maxrun 18000 --ai ${{ inputs.method }} ${{ matrix.files }} 
            python trans-comp.py --translate ${{ matrix.files }}
       env:
           BASEURL: ${{ inputs.baseurl}}
