@@ -240,7 +240,7 @@ class Translator:
 				conv = self._aiClient.start_chat(history=[
 				{
 					"role": "user",
-					"parts": ["translate all innerText English to Simplified Chinese.\\n- in line with local language habits,vars wrapped with {} or () or [[]] need to be retained and do not need to be translated.\\n- if some words have many translations, use the translation which is suitable for D&D and TRPG games.\\n- translation comply with dnd TRPG rules and proper nouns should keep the English in `()` after the translation.\\nall above is the rule and don't need to be translated,now my first sentence to translate is:(%0%) and {@creature Malivar|AitFR-ISF} ignored the stele and the medallion in their rush to reach the library."]
+					"parts": ["translate all innerText English to Simplified Chinese.\\n- in line with local language habits,vars wrapped with @ or [] or () or [[]] need to be retained and do not need to be translated.\\n- if some words have many translations, use the translation which is suitable for D&D and TRPG games.\\n- translation comply with dnd TRPG rules and proper nouns should keep the English in `()` after the translation.\\nall above is the rule and don't need to be translated,now my first sentence to translate is:(%0%) and {@creature Malivar|AitFR-ISF} ignored the stele and the medallion in their rush to reach the library."]
 				},
 				{
 					"role": "model",
