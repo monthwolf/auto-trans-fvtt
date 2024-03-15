@@ -59,8 +59,9 @@ jobs:
       continue-on-error: true
       run: |
            cd $GITHUB_WORKSPACE
-           python trans-comp.py --maxrun 18000 --translate --ai ${{ inputs.method }} ${{ matrix.files }} 
-           python trans-comp.py --translate ${{ matrix.files }}
+           ls
+           python trans-comp.py --maxrun 18000 --translate --ai ${{ inputs.method }} ${{ matrix.files }} 
+           python trans-comp.py --translate ${{ matrix.files }}
       env:
           BASEURL: ${{ inputs.baseurl}}
           MODEL: ${{ inputs.model }}
