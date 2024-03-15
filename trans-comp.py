@@ -60,7 +60,7 @@ class Translator:
 
 		#self._tag_regex = '{(?!(@i )|(@italic )|(@b )|(@bold )|(@u )|(@underline )|(@s )|(@strike )|(@color )|(@note )|(@footnote )).*?}'
 		#self._tag_regex = '{(?!(@note )|(@footnote )).*?}'
-		self._tag_regex = '{.*?{.*?}.*?}|{.*?}'
+		self._tag_regex = '@.*?\[.*?\]'
 		self._maxLength = maxLength
 		self._cacheFile = cacheFile
 		self._cacheDirty = False
@@ -185,9 +185,12 @@ class Translator:
 						"role": "system",
 						"content": '''translate English words to Simplified Chinese.
 - For stand-alone phrase words, do not add periods.
-- in line with local language habits,vars wrapped with @ or [] or () or [[]] need to be retained and do not need to be translated.
+- in line with local language habits.
+- if `{custom text}` exsits,the `custom text` contents should be translated
+- vars like `(%n%)` should be kept.
 - if some words have many translations, use the translation which is suitable for D&D,COC or TRPG.
-- translation comply with dnd TRPG rules and proper nouns should keep the original text in `()` after the translation.
+- translation comply with dnd TRPG rules.
+- proper nouns should keep their original English in `()` after the translation.
 						'''
 						},
 						{
