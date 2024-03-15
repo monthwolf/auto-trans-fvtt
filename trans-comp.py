@@ -437,7 +437,7 @@ def translate_data(translator: Translator, data):
 						data[k][idx] = translator.translate(entry)
 					else:
 						translate_data(translator, entry)
-			elif type(v) is dict:
+			elif type(v) is dict and k not in ['mapping']:
 				translate_data(translator, v)
 
 def translate_file(language: str, fileName: str, writeJSON: bool, useDeepl: bool, recheckWords: list,useAI: str,maxLength: int):
