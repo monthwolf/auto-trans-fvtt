@@ -60,7 +60,7 @@ class Translator:
 
 		#self._tag_regex = '{(?!(@i )|(@italic )|(@b )|(@bold )|(@u )|(@underline )|(@s )|(@strike )|(@color )|(@note )|(@footnote )).*?}'
 		#self._tag_regex = '{(?!(@note )|(@footnote )).*?}'
-		self._tag_regex = '@.*?\[.*?\]'
+		self._tag_regex = '@.*?\[.*?\]|\[\[.*?\]\]\]'
 		self._maxLength = maxLength
 		self._cacheFile = cacheFile
 		self._cacheDirty = False
@@ -304,7 +304,7 @@ class Translator:
 		# Replace links with specific markers we can put in place after translating later
 		links = []
 		count = 0
-		link = re.search("{.*?{.*?}.*?}|{.*?}", text)
+		link = re.search(self._tag_regex, text)
 		while link is not None:
 			links.append(link.group(0))
 			text = re.sub(self._tag_regex, f"(%{count}%)", text, 1)
@@ -354,7 +354,7 @@ class Translator:
 			translated_text = re.sub(r"（(%\d+%)）", r"(\1)", translated_text)
 			translated_text = self.tags2links(translated_text, links)
 			translated_text = re.sub(r"（(.*?)）",r"(\1)",translated_text)
-			print("原文："+text)
+			print("原文："+translate_text)
 			print("AI翻译："+translated_text)
 			time.sleep(0.5)
 			self.cacheSet(text, translated_text)
