@@ -60,7 +60,7 @@ class Translator:
 
 		#self._tag_regex = '{(?!(@i )|(@italic )|(@b )|(@bold )|(@u )|(@underline )|(@s )|(@strike )|(@color )|(@note )|(@footnote )).*?}'
 		#self._tag_regex = '{(?!(@note )|(@footnote )).*?}'
-		self._tag_regex = '@.*?\[.*?\]|\[\[.*?\]\]\]'
+		self._tag_regex = '@.*?\[.*?\]|\[\[[\s\S]*?\]\]\]'
 		self._maxLength = maxLength
 		self._cacheFile = cacheFile
 		self._cacheDirty = False
@@ -429,7 +429,7 @@ def translate_data(translator: Translator, data):
 		for k, v in data.items():
 			# We only translate specific keys from dicts
 			# print(k+"  test   "+str(v))
-			if (k  not in  ['id'] and type(v) is str) or (k==v and type(v)):
+			if (k  not in  ['id','src'] and type(v) is str) or (k==v and type(v)):
 				data[k] = translator.translate(v)
 			elif type(v) is list:
 				for idx, entry in enumerate(v):
